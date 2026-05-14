@@ -261,12 +261,18 @@ module Resque
         count
       end
 
+      # Counts all jobs across all delayed timestamps.
+      # Uses pipelined LLEN calls in batches to avoid blocking the Redis thread
+      # for too long while being significantly faster than sequential calls.
       def count_all_scheduled_jobs
-        total_jobs = 0
-        Array(redis.zrange(:delayed_queue_schedule, 0, -1)).each do |ts|
-          total_jobs += redis.llen("delayed:#{ts}").to_i
+        timestamps = Array(redis.zrange(:delayed_queue_schedule, 0, -1))
+        return 0 if timestamps.empty?
+
+        timestamps.each_slice(10_000).sum do |batch|
+          redis.pipelined do |pipeline|
+            batch.each { |ts| pipeline.llen("delayed:#{ts}") }
+          end.sum
         end
-        total_jobs
       end
 
       # Discover if a job has been delayed.
