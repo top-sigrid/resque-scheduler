@@ -1100,6 +1100,10 @@ context 'DelayedQueue' do
     end
   end
 
+  test 'count_all_scheduled_jobs returns 0 when no jobs are scheduled' do
+    assert_equal(0, Resque.count_all_scheduled_jobs)
+  end
+
   test 'delayed?' do
     Resque.enqueue_at Time.now + 1, SomeIvarJob
     Resque.enqueue_at Time.now + 1, SomeIvarJob, id: 1
