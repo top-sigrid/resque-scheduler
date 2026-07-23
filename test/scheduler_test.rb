@@ -29,7 +29,7 @@ context 'Resque::Scheduler' do
     Resque::Scheduler.enqueue_from_config(config)
   end
 
-  test 'enqueue_from_config runs before_delayed_enqueue and resque hooks but not schedule hooks' do
+  test 'enqueue_from_config runs before_delayed_enqueue and resque hooks not schedule hooks' do
     Resque::Scheduler.env = 'production'
     config = {
       'cron' => '* * * * *',
